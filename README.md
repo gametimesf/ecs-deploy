@@ -4,10 +4,8 @@ Deploy ECS service to a Docker image.
 
 ## Install
 
-[Download the binary](https://github.com/travisjeffery/ecs-deploy/releases/latest), or go get:
-
 ```
-$ go get github.com/travisjeffery/ecs-deploy
+$ go get github.com/gametimesf/ecs-deploy
 ```
 
 ## Example
