@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/gametimesf/ecs-deploy/client"
-	"gopkg.in/alecthomas/kingpin.v2"
+	"github.com/alecthomas/kingpin"
 )
 
 var (
