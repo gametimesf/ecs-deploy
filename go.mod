@@ -3,9 +3,6 @@ module github.com/gametimesf/ecs-deploy
 go 1.12
 
 require (
-	github.com/alecthomas/kingpin v2.2.6+incompatible
-	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
-	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
 	github.com/aws/aws-sdk-go v1.10.41
 	github.com/go-ini/ini v1.28.2 // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20151117175822-3433f3ea46d9 // indirect

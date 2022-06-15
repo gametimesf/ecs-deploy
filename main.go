@@ -1,34 +1,41 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/gametimesf/ecs-deploy/client"
-	"github.com/alecthomas/kingpin"
 )
 
 var (
-	service = kingpin.Flag("service", "Name of Service to update.").Required().String()
-	image   = kingpin.Flag("image", "Name of Docker image to run.").String()
-	tag     = kingpin.Flag("tag", "Tag of Docker image to run.").String()
-	cluster = kingpin.Flag("cluster", "Name of ECS cluster.").Default("default").String()
-	task    = kingpin.Flag("task", "Name of task definition. Defaults to service name").String()
-	region  = kingpin.Flag("region", "Name of AWS region.").Default("us-east-1").OverrideDefaultFromEnvar("AWS_DEFAULT_REGION").String()
-	count   = kingpin.Flag("count", "Desired count of instantiations to place and run in service. Defaults to existing running count.").Default("-1").Int64()
-	nowait  = kingpin.Flag("nowait", "Disable waiting for all task definitions to start running").Bool()
-	// VERSION is set via ldflag
-	VERSION = "0.0.0"
+	service = flag.String("service", "", "Name of Service to update. Required.")
+	image   = flag.String("image", "", "Name of Docker image to run.")
+	tag     = flag.String("tag", "", "Tag of Docker image to run.")
+	cluster = flag.String("cluster", "default", "Name of ECS cluster.")
+	task    = flag.String("task", "", "Name of task definition. Defaults to service name")
+	region  = flag.String("region", "us-east-1", "Name of AWS region.")
+	count   = flag.Int64("count", -1, "Desired count of instantiations to place and run in service. Defaults to existing running count.")
+	nowait  = flag.Bool("nowait", false, "Disable waiting for all task definitions to start running")
 )
 
 func main() {
-	kingpin.UsageTemplate(kingpin.CompactUsageTemplate).Version(VERSION)
-	kingpin.CommandLine.Help = "Update ECS service."
-	kingpin.Parse()
+	flag.Parse()
+
+	if *service == "" {
+		_, _ = fmt.Fprintln(os.Stderr, "service name is required")
+		flag.Usage()
+		os.Exit(1)
+	}
 
 	if *task == "" {
 		task = service
+	}
+
+	if *region == "" {
+		r := os.Getenv("AWS_DEFAULT_REGION")
+		region = &r
 	}
 
 	prefix := fmt.Sprintf("%s/%s ", *cluster, *service)
