@@ -138,7 +138,24 @@ func (c *Client) CreateDeployment(applicationName *string, deploymentGroupName *
 		ContainerPort:     *servicePort,
 	}
 
-	appSpecTemplate := template.Must(template.ParseFiles("app-spec-template.txt"))
+	appSpecTemplateString := `{
+		"version": 1,
+		"Resources": [{
+			"TargetService": {
+				"Type": "AWS::ECS::Service",
+				"Properties": {
+					"TaskDefinition": "{{.TaskDefinitionArn}}",
+					"LoadBalancerInfo": {
+						"ContainerName": "{{.ContainerName}}",
+						"ContainerPort": {{.ContainerPort}}
+					}
+				}
+			}
+		}],
+		"Hooks": []
+	}`
+
+	appSpecTemplate := template.Must(template.New("appspec").Parse(appSpecTemplateString))
 	var content bytes.Buffer
 	err := appSpecTemplate.Execute(&content, appSpec)
 	if err != nil {
