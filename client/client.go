@@ -1,18 +1,22 @@
 package client
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"log"
 	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/codedeploy"
 	"github.com/aws/aws-sdk-go/service/ecs"
 )
 
 type Client struct {
 	svc          *ecs.ECS
+	cdSvc        *codedeploy.CodeDeploy
 	logger       *log.Logger
 	pollInterval time.Duration
 }
@@ -20,8 +24,10 @@ type Client struct {
 func New(region *string, logger *log.Logger) *Client {
 	sess := session.New(&aws.Config{Region: region})
 	svc := ecs.New(sess)
+	cdSvc := codedeploy.New(sess)
 	return &Client{
 		svc:          svc,
+		cdSvc:        cdSvc,
 		pollInterval: time.Second * 5,
 		logger:       logger,
 	}
@@ -118,4 +124,39 @@ func (c *Client) GetTaskDefinition(task *string) (*ecs.TaskDefinition, error) {
 		return nil, err
 	}
 	return output.TaskDefinition, nil
+}
+
+func (c *Client) CreateDeployment(applicationName *string, deploymentGroupName *string, serviceName *string, servicePort *int64, taskDefinitionArn *string) error {
+	type AppSpec struct {
+		TaskDefinitionArn string
+		ContainerName     string
+		ContainerPort     int64
+	}
+	appSpec := AppSpec{
+		TaskDefinitionArn: *taskDefinitionArn,
+		ContainerName:     *serviceName,
+		ContainerPort:     *servicePort,
+	}
+
+	appSpecTemplate := template.Must(template.ParseFiles("app-spec-template.txt"))
+	var content bytes.Buffer
+	err := appSpecTemplate.Execute(&content, appSpec)
+	if err != nil {
+		return err
+	}
+	contentString := content.String()
+
+	appSpecContent := &codedeploy.AppSpecContent{Content: &contentString}
+	revisionType := "AppSpecContent"
+	revision := &codedeploy.RevisionLocation{
+		AppSpecContent: appSpecContent,
+		RevisionType:   &revisionType,
+	}
+	input := &codedeploy.CreateDeploymentInput{
+		ApplicationName:     applicationName,
+		DeploymentGroupName: deploymentGroupName,
+		Revision:            revision,
+	}
+	_, err = c.cdSvc.CreateDeployment(input)
+	return err
 }

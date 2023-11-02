@@ -36,6 +36,10 @@ Flags:
   --count=-1            Desired count of instantiations to run. Defaults to existing running count.
   --nowait              Disable waiting for task definitions to start running.
   --version             Show application version.
+  --canary              Use canary deployment strategy
+  --app                 CodeDeploy application name
+  --deploygroup         CodeDeploy deployment group name
+  --port                Service port
 ```
 
 You can also override the default region by setting the `AWS_DEFAULT_REGION` environmental variable.
