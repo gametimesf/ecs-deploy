@@ -26,20 +26,20 @@ usage: ecs-deploy --service=SERVICE [<flags>]
 Deploy ECS service.
 
 Flags:
-  --help                Show context-sensitive help (also try --help-long and --help-man).
-  --service=SERVICE     Name of Service to update.
-  --task=TASK-DEF       Name of Task Definition to update. Defaults to service.
-  --image=IMAGE         Name of Docker image to run.
-  --tag=TAG             Tag of Docker image to run.
-  --cluster="default"   Name of ECS cluster.
-  --region="us-east-1"  Name of AWS region.
-  --count=-1            Desired count of instantiations to run. Defaults to existing running count.
-  --nowait              Disable waiting for task definitions to start running.
-  --version             Show application version.
-  --canary              Use canary deployment strategy
-  --app                 CodeDeploy application name
-  --deploygroup         CodeDeploy deployment group name
-  --port                Service port
+  --help                    Show context-sensitive help (also try --help-long and --help-man).
+  --service=SERVICE         Name of Service to update.
+  --task=TASK-DEF           Name of Task Definition to update. Defaults to service.
+  --image=IMAGE             Name of Docker image to run.
+  --tag=TAG                 Tag of Docker image to run.
+  --cluster="default"       Name of ECS cluster.
+  --region="us-east-1"      Name of AWS region.
+  --count=-1                Desired count of instantiations to run. Defaults to existing running count.
+  --nowait                  Disable waiting for task definitions to start running.
+  --version                 Show application version.
+  --canary                  Use canary deployment strategy
+  --app=APP                 CodeDeploy application name
+  --deploygroup=DEPLOYGROUP CodeDeploy deployment group name
+  --port=PORT               Service port
 ```
 
 You can also override the default region by setting the `AWS_DEFAULT_REGION` environmental variable.
