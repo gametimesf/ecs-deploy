@@ -92,6 +92,20 @@ func (c *Client) Wait(cluster, service, arn *string) error {
 
 // GetDeployment gets the deployment for the arn.
 func (c *Client) GetDeployment(cluster, service, arn *string) (*ecs.Deployment, error) {
+	ds, err := c.GetDeployments(cluster, service)
+	if err != nil {
+		return nil, err
+	}
+	for _, d := range ds {
+		if *d.TaskDefinition == *arn {
+			return d, nil
+		}
+	}
+	return nil, nil
+}
+
+// GetDeployments gets the deployments for service in the cluster.
+func (c *Client) GetDeployments(cluster, service *string) ([]*ecs.Deployment, error) {
 	input := &ecs.DescribeServicesInput{
 		Cluster:  cluster,
 		Services: []*string{service},
@@ -100,13 +114,7 @@ func (c *Client) GetDeployment(cluster, service, arn *string) (*ecs.Deployment, 
 	if err != nil {
 		return nil, err
 	}
-	ds := output.Services[0].Deployments
-	for _, d := range ds {
-		if *d.TaskDefinition == *arn {
-			return d, nil
-		}
-	}
-	return nil, nil
+	return output.Services[0].Deployments, nil
 }
 
 // GetTaskDefinition gets the latest revision for the given task definition
