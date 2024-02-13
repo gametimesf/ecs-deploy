@@ -62,11 +62,11 @@ func main() {
 
 		d := deployments[0]
 		if *d.TaskDefinition != *taskDef.TaskDefinitionArn {
-			logger.Printf("[error] latest task definition not running: %s\n", d.TaskDefinition)
+			logger.Printf("[error] latest task definition not running: %s\n", *d.TaskDefinition)
 			os.Exit(1)
 		}
 
-		logger.Printf("[info] latest task definition running: %s\n", d.TaskDefinition)
+		logger.Printf("[info] latest task definition running: %s\n", *d.TaskDefinition)
 	}
 
 	if image != nil {
