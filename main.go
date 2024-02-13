@@ -18,7 +18,7 @@ var (
 	region        = flag.String("region", "us-east-1", "Name of AWS region.")
 	count         = flag.Int64("count", -1, "Desired count of instantiations to place and run in service. Defaults to existing running count.")
 	nowait        = flag.Bool("nowait", false, "Disable waiting for all task definitions to start running")
-	requirelatest = flag.Bool("require-latest", true, "Require the latest task definition to be running")
+	requireLatest = flag.Bool("require-latest", true, "Require the latest task definition to be running")
 )
 
 func main() {
@@ -46,7 +46,7 @@ func main() {
 	arn := ""
 	var err error
 
-	if *requirelatest {
+	if *requireLatest {
 		// check if the latest task definition is running. if it is not, do not proceed with the deployment.
 		taskDef, err := c.GetTaskDefinition(task)
 		if err != nil {
