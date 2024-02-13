@@ -55,6 +55,9 @@ func main() {
 		}
 
 		deployments, err := c.GetDeployments(cluster, service)
+		// there can be more than 1 deployment running if a deployment is in progress,
+		// not worth handling at this point: it's not possible to determine if the latest deployment
+		// will succeed, for example.
 		if len(deployments) != 1 {
 			logger.Printf("[error] not exactly one deployment found: %d\n", len(deployments))
 			os.Exit(1)
