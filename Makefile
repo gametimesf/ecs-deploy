@@ -16,5 +16,5 @@ tidy:
 
 fmt:
 	go fmt ./...
-	find . -name '*.go' -exec gci write -s 'standard' -s 'default' -s 'prefix(github.com/gametimesf/the-algo)' {} \; > /dev/null
+	find . -name '*.go' -exec gci write -s 'standard' -s 'default' -s 'prefix(github.com/gametimesf/ecs-deploy)' {} \; > /dev/null
 
