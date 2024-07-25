@@ -42,12 +42,13 @@ func (c *Client) RegisterTaskDefinition(task, image, tag *string) (string, error
 		}
 	}
 	input := &ecs.RegisterTaskDefinitionInput{
-		Family:               task,
-		TaskRoleArn:          taskDef.TaskRoleArn,
-		NetworkMode:          taskDef.NetworkMode,
-		ContainerDefinitions: defs,
-		Volumes:              taskDef.Volumes,
-		PlacementConstraints: taskDef.PlacementConstraints,
+		Family:                  task,
+		TaskRoleArn:             taskDef.TaskRoleArn,
+		NetworkMode:             taskDef.NetworkMode,
+		ContainerDefinitions:    defs,
+		Volumes:                 taskDef.Volumes,
+		PlacementConstraints:    taskDef.PlacementConstraints,
+		RequiresCompatibilities: taskDef.RequiresCompatibilities,
 	}
 	resp, err := c.svc.RegisterTaskDefinition(input)
 	if err != nil {
