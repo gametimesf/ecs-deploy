@@ -49,6 +49,7 @@ func (c *Client) RegisterTaskDefinition(task, image, tag *string) (string, error
 		Volumes:                 taskDef.Volumes,
 		PlacementConstraints:    taskDef.PlacementConstraints,
 		RequiresCompatibilities: taskDef.RequiresCompatibilities,
+		ExecutionRoleArn:        taskDef.ExecutionRoleArn,
 	}
 	resp, err := c.svc.RegisterTaskDefinition(input)
 	if err != nil {
