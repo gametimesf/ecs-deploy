@@ -1,10 +1,7 @@
 OUTPUT = bin/ecs-deploy
-BUILD_DATE=`date +%FT%T%z`
-GIT_HASH=`git rev-parse HEAD`
-LDFLAGS=-ldflags="-X github.com/gametimesf/log.builtAt=${BUILD_DATE} -X github.com/gametimesf/log.commitHash=${GIT_HASH}"
 
 build:
-	CGO_ENABLED=0 go build ${LDFLAGS} -o ${OUTPUT} *.go
+	CGO_ENABLED=0 go build -o ${OUTPUT} *.go
 
 .PHONY: lint
 lint:
