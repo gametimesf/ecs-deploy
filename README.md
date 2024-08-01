@@ -2,6 +2,18 @@
 
 Deploy ECS service to a Docker image.
 
+## Prerequisites
+
+### Install Dependencies
+
+- [Install Pre-Commit](https://pre-commit.com/)
+- Install the pre-commit hooks  
+`pre-commit install -t pre-commit -t commit-msg`
+
+### Review the Contributing Guide
+Please follow the guide in
+[CONTRIBUTING.md](CONTRIBUTING.md) for information on contributing standards.
+
 ## Install
 
 ```
