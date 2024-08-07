@@ -1,15 +1,16 @@
-OUTPUT := bin/${current_dir}
+OUTPUT = bin/ecs-deploy
 
 build:
-	CGO_ENABLED=${CGO_ENABLED} go build ${LDFLAGS} -o ${OUTPUT} *.go
+	CGO_ENABLED=0 go build -o ${OUTPUT} *.go
 
 .PHONY: lint
 lint:
-	go vet -tags test $$(go list ./...)
 	golangci-lint run
 
 test:
-	go test -race -cover -coverprofile cover.out $$(go list ./...)
+	go test -coverprofile tests.cover.tmp -race -cover ./...
+	grep -v mock < tests.cover.tmp > tests.cover
+	rm tests.cover.tmp
 
 tidy:
 	go mod tidy
@@ -17,4 +18,3 @@ tidy:
 fmt:
 	go fmt ./...
 	find . -name '*.go' -exec gci write -s 'standard' -s 'default' -s 'prefix(github.com/gametimesf/ecs-deploy)' {} \; > /dev/null
-

@@ -1,0 +1,8 @@
+---
+exclude_paths:
+  - "**/*_test.go"
+  - "*_test.go"
+  - "**/mock*"
+  - "**/*mock.go"
+  - "**/*.md"
+  - "*.md"
