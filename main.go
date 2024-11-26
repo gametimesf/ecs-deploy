@@ -10,16 +10,27 @@ import (
 )
 
 var (
-	service       = flag.String("service", "", "Name of Service to update. Required.")
-	image         = flag.String("image", "", "Name of Docker image to run.")
-	tag           = flag.String("tag", "", "Tag of Docker image to run.")
-	cluster       = flag.String("cluster", "default", "Name of ECS cluster.")
-	task          = flag.String("task", "", "Name of task definition. Defaults to service name")
-	region        = flag.String("region", "us-east-1", "Name of AWS region.")
-	count         = flag.Int64("count", -1, "Desired count of instantiations to place and run in service. Defaults to existing running count.")
-	nowait        = flag.Bool("nowait", false, "Disable waiting for all task definitions to start running")
-	requireLatest = flag.Bool("require-latest", true, "Require the latest task definition to be running")
+	service              = flag.String("service", "", "Name of Service to update. Required.")
+	image                = flag.String("image", "", "Name of Docker image to run.")
+	tag                  = flag.String("tag", "", "Tag of Docker image to run.")
+	cluster              = flag.String("cluster", "default", "Name of ECS cluster.")
+	task                 = flag.String("task", "", "Name of task definition. Defaults to service name")
+	region               = flag.String("region", "us-east-1", "Name of AWS region.")
+	count                = flag.Int64("count", -1, "Desired count of instantiations to place and run in service. Defaults to existing running count.")
+	nowait               = flag.Bool("nowait", false, "Disable waiting for all task definitions to start running")
+	requireLatest        = flag.Bool("require-latest", true, "Require the latest task definition to be running")
+	enableECSManagedTags = flag.Bool("enable-ecs-managed-tags", false, "Enable ECS managed tags to be automatically added to running tasks.")
+	propagateTags        = flag.String("propagate-tags", "NONE", "Propagate custom tags to the task. The value indicates the source of tags TASK_DEFINITION, SERVICE, or NONE.")
 )
+
+func isValid(value string, validValues []string) bool {
+	for _, v := range validValues {
+		if value == v {
+			return true
+		}
+	}
+	return false
+}
 
 func main() {
 	flag.Parse()
@@ -37,6 +48,13 @@ func main() {
 	if *region == "" {
 		r := os.Getenv("AWS_DEFAULT_REGION")
 		region = &r
+	}
+
+	validPropagateTags := []string{"NONE", "TASK_DEFINITION", "SERVICE"}
+	if !isValid(*propagateTags, validPropagateTags) {
+		_, _ = fmt.Fprintln(os.Stderr, "propagate-tags must be one of NONE, TASK_DEFINITION, or SERVICE")
+		flag.Usage()
+		os.Exit(1)
 	}
 
 	prefix := fmt.Sprintf("%s/%s ", *cluster, *service)
@@ -80,7 +98,7 @@ func main() {
 		}
 	}
 
-	err = c.UpdateService(cluster, service, count, &arn)
+	err = c.UpdateService(cluster, service, count, &arn, enableECSManagedTags, propagateTags)
 	if err != nil {
 		logger.Printf("[error] update service: %s\n", err)
 		os.Exit(1)

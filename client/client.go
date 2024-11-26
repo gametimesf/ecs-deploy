@@ -61,7 +61,7 @@ func (c *Client) RegisterTaskDefinition(task, image, tag *string) (string, error
 }
 
 // UpdateService updates the service to use the new task definition.
-func (c *Client) UpdateService(cluster, service *string, count *int64, arn *string) error {
+func (c *Client) UpdateService(cluster, service *string, count *int64, arn *string, enableECSManagedTags *bool, propagateTags *string) error {
 	input := &ecs.UpdateServiceInput{
 		Cluster: cluster,
 		Service: service,
@@ -71,6 +71,12 @@ func (c *Client) UpdateService(cluster, service *string, count *int64, arn *stri
 	}
 	if arn != nil {
 		input.TaskDefinition = arn
+	}
+	if enableECSManagedTags != nil {
+		input.EnableECSManagedTags = enableECSManagedTags
+	}
+	if propagateTags != nil {
+		input.PropagateTags = propagateTags
 	}
 	_, err := c.svc.UpdateService(input)
 	return err
