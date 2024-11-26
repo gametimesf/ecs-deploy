@@ -19,7 +19,7 @@ var (
 	count                = flag.Int64("count", -1, "Desired count of instantiations to place and run in service. Defaults to existing running count.")
 	nowait               = flag.Bool("nowait", false, "Disable waiting for all task definitions to start running")
 	requireLatest        = flag.Bool("require-latest", true, "Require the latest task definition to be running")
-	enableECSManagedTags = flag.Bool("enable-ecs-managed-tags", false, "Enable ECS managed tags to be automatically added to running tasks.")
+	enableECSManagedTags = flag.Bool("enable-ecs-managed-tags", true, "Enable ECS managed tags to be automatically added to running tasks.")
 	propagateTags        = flag.String("propagate-tags", "NONE", "Propagate custom tags to the task. The value indicates the source of tags TASK_DEFINITION, SERVICE, or NONE.")
 )
 

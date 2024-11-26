@@ -48,7 +48,7 @@ Flags:
   --count=-1                        Desired count of instantiations to run. Defaults to existing running count.
   --nowait                          Disable waiting for task definitions to start running.
   --version                         Show application version.
-  --enable-ecs-managed-tags=false   Enable adding ECS managed tags to tasks.
+  --enable-ecs-managed-tags=true    Enable adding ECS managed tags to tasks.
   --propagate-tags="NONE"           Enable adding custom tags to tasks. Options indicate source: TASK_DEFINITION, SERVICE, NONE
 ```
 
