@@ -38,16 +38,18 @@ usage: ecs-deploy --service=SERVICE [<flags>]
 Deploy ECS service.
 
 Flags:
-  --help                Show context-sensitive help (also try --help-long and --help-man).
-  --service=SERVICE     Name of Service to update.
-  --task=TASK-DEF       Name of Task Definition to update. Defaults to service.
-  --image=IMAGE         Name of Docker image to run.
-  --tag=TAG             Tag of Docker image to run.
-  --cluster="default"   Name of ECS cluster.
-  --region="us-east-1"  Name of AWS region.
-  --count=-1            Desired count of instantiations to run. Defaults to existing running count.
-  --nowait              Disable waiting for task definitions to start running.
-  --version             Show application version.
+  --help                            Show context-sensitive help (also try --help-long and --help-man).
+  --service=SERVICE                 Name of Service to update.
+  --task=TASK-DEF                   Name of Task Definition to update. Defaults to service.
+  --image=IMAGE                     Name of Docker image to run.
+  --tag=TAG                         Tag of Docker image to run.
+  --cluster="default"               Name of ECS cluster.
+  --region="us-east-1"              Name of AWS region.
+  --count=-1                        Desired count of instantiations to run. Defaults to existing running count.
+  --nowait                          Disable waiting for task definitions to start running.
+  --version                         Show application version.
+  --enable-ecs-managed-tags=false   Enable adding ECS managed tags to tasks.
+  --propagate-tags="NONE"           Enable adding custom tags to tasks. Options indicate source: TASK_DEFINITION, SERVICE, NONE
 ```
 
 You can also override the default region by setting the `AWS_DEFAULT_REGION` environmental variable.
