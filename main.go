@@ -16,9 +16,11 @@ var (
 	cluster       = flag.String("cluster", "default", "Name of ECS cluster.")
 	task          = flag.String("task", "", "Name of task definition. Defaults to service name")
 	region        = flag.String("region", "us-east-1", "Name of AWS region.")
+	taskRoleArn   = flag.String("task-role-arn", "", "ARN of the task role to use. Will override the task role in the task definition.")
 	count         = flag.Int64("count", -1, "Desired count of instantiations to place and run in service. Defaults to existing running count.")
 	nowait        = flag.Bool("nowait", false, "Disable waiting for all task definitions to start running")
 	requireLatest = flag.Bool("require-latest", true, "Require the latest task definition to be running")
+	dryRun        = flag.Bool("dry-run", false, "Perform a dry run without doing any write operations")
 )
 
 func main() {
@@ -41,7 +43,7 @@ func main() {
 
 	prefix := fmt.Sprintf("%s/%s ", *cluster, *service)
 	logger := log.New(os.Stderr, prefix, log.LstdFlags)
-	c := client.New(region, logger)
+	c := client.New(region, logger, *dryRun, *taskRoleArn)
 
 	arn := ""
 	var err error
@@ -55,6 +57,9 @@ func main() {
 		}
 
 		deployments, err := c.GetDeployments(cluster, service)
+		if err != nil {
+			logger.Fatalf("[error] get deployments: %s\n", err)
+		}
 		// there can be more than 1 deployment running if a deployment is in progress,
 		// not worth handling at this point: it's not possible to determine if the latest deployment
 		// will succeed, for example.
@@ -73,7 +78,7 @@ func main() {
 	}
 
 	if image != nil {
-		arn, err = c.RegisterTaskDefinition(task, image, tag)
+		arn, err = c.RegisterTaskDefinition(task, image, tag, service)
 		if err != nil {
 			logger.Printf("[error] register task definition: %s\n", err)
 			os.Exit(1)

@@ -1,11 +1,17 @@
 module github.com/gametimesf/ecs-deploy
 
-go 1.12
+go 1.22
+
+toolchain go1.23.4
 
 require (
 	github.com/aws/aws-sdk-go v1.55.2
-	github.com/go-ini/ini v1.28.2 // indirect
-	github.com/smartystreets/goconvey v0.0.0-20190710185942-9d28bd7c0945 // indirect
-	github.com/stretchr/testify v1.3.0 // indirect
-	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
+	github.com/stretchr/testify v1.10.0
+)
+
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
