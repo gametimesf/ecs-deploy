@@ -71,7 +71,7 @@ func (c *Client) RegisterTaskDefinition(task, image, tag, service *string) (stri
 	// If any errors occur, use the existing task role.
 	taskRoleArn, err := c.getTaskRole(taskDef.TaskRoleArn, service)
 	if err != nil {
-		c.logger.Printf("[warn] Error getting task role: %v", err)
+		c.logger.Printf("[warn] Error getting task role, reusing what's in current task definition: %v", err)
 	}
 
 	input := &ecs.RegisterTaskDefinitionInput{

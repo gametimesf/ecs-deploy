@@ -10,16 +10,21 @@ import (
 )
 
 var (
-	taskRoleRegex    = regexp.MustCompile(`arn:aws:iam::\d{12}:role/internal/service/ecs-task/[a-z-]+\.(testing|staging|production)$`)
-	serviceNameRegex = regexp.MustCompile(`(testing|staging|production)-([a-z-]+)-service$`)
+	roleRegex        = regexp.MustCompile(`^arn:aws:iam::\d{12}:role/[A-Za-z0-9+=,.@_/-]+$`)
+	taskRoleRegex    = regexp.MustCompile(`^arn:aws:iam::\d{12}:role/internal/service/ecs-task/[a-z-]+\.(testing|staging|production)$`)
+	serviceNameRegex = regexp.MustCompile(`^(testing|staging|production)-([a-z-]+)-service$`)
 )
 
 // getTaskRole attempts to determine the correct task role ARN based on the service name
 // and checks if it exists in AWS
 func (c *Client) getTaskRole(currentRoleArn, service *string) (*string, error) {
-	// If a task role ARN is provided, return that
+	// If a valid task role ARN is set in the client, return that
 	if c.taskRoleArn != "" {
-		return &c.taskRoleArn, nil
+		if roleRegex.MatchString(c.taskRoleArn) {
+			c.logger.Printf("[info] Using supplied task role ARN: %s", c.taskRoleArn)
+			return &c.taskRoleArn, nil
+		}
+		return currentRoleArn, fmt.Errorf("supplied task role ARN %s doesn't conform to expected pattern", c.taskRoleArn)
 	}
 
 	// Input validation

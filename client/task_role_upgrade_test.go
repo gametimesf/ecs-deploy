@@ -198,6 +198,15 @@ func TestGetTaskRole(t *testing.T) {
 			expectError: false,
 		},
 		{
+			name:           "Success - TaskRoleArn is set and valid",
+			currentRoleArn: "arn:aws:iam::123456789012:role/old-format",
+			service:        "staging-my-service-service",
+			mockFunc:       nil,
+			taskRoleArn:    "arn:aws:iam::123456789012:role/test/some-other-role",
+			expectedARN:    "arn:aws:iam::123456789012:role/test/some-other-role",
+			expectError:    false,
+		},
+		{
 			name:           "Failure - Upgrade role format failure",
 			currentRoleArn: "arn:aws:iam::123456789012:role/old-format",
 			service:        "testing-edgar-test-service",
@@ -237,13 +246,12 @@ func TestGetTaskRole(t *testing.T) {
 			expectError: true,
 		},
 		{
-			name:           "Success - TaskRoleArn is set",
+			name:           "Failure - TaskRoleArn is set but is invalid",
 			currentRoleArn: "arn:aws:iam::123456789012:role/old-format",
 			service:        "staging-my-service-service",
 			mockFunc:       nil,
-			taskRoleArn:    "override-arn",
-			expectedARN:    "override-arn",
-			expectError:    false,
+			taskRoleArn:    "invalid-arn",
+			expectError:    true,
 		},
 	}
 
