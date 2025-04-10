@@ -8,8 +8,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 // MockIAMClient is a simple mock for the IAM client.
@@ -74,11 +72,19 @@ func TestExtractServiceInfo(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			name, env, err := extractServiceInfo(tc.input)
 			if tc.expectError {
-				require.Error(t, err)
+				if err == nil {
+					t.Errorf("Expected error but got nil")
+				}
 			} else {
-				require.NoError(t, err)
-				assert.Equal(t, tc.expectedName, name)
-				assert.Equal(t, tc.expectedEnv, env)
+				if err != nil {
+					t.Errorf("Unexpected error: %v", err)
+				}
+				if name != tc.expectedName {
+					t.Errorf("Expected name %q, but got %q", tc.expectedName, name)
+				}
+				if env != tc.expectedEnv {
+					t.Errorf("Expected env %q, but got %q", tc.expectedEnv, env)
+				}
 			}
 		})
 	}
@@ -151,10 +157,16 @@ func TestGetRoleArn(t *testing.T) {
 			}
 			arn, err := client.getRoleArn(tc.roleName)
 			if tc.expectError {
-				require.Error(t, err)
+				if err == nil {
+					t.Errorf("Expected error but got nil")
+				}
 			} else {
-				require.NoError(t, err)
-				assert.Equal(t, tc.expectedARN, arn)
+				if err != nil {
+					t.Errorf("Unexpected error: %v", err)
+				}
+				if arn != tc.expectedARN {
+					t.Errorf("Expected ARN %q, but got %q", tc.expectedARN, arn)
+				}
 			}
 		})
 	}
@@ -280,10 +292,18 @@ func TestGetTaskRole(t *testing.T) {
 			}
 			result, err := client.getTaskRole(&tc.currentRoleArn, &tc.service)
 			if tc.expectError {
-				require.Error(t, err)
+				if err == nil {
+					t.Errorf("Expected error but got nil")
+				}
 			} else {
-				require.NoError(t, err)
-				assert.Equal(t, tc.expectedARN, *result)
+				if err != nil {
+					t.Errorf("Unexpected error: %v", err)
+				}
+				if result == nil {
+					t.Errorf("Expected result but got nil")
+				} else if *result != tc.expectedARN {
+					t.Errorf("Expected ARN %q, but got %q", tc.expectedARN, *result)
+				}
 			}
 		})
 	}
