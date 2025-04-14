@@ -9,26 +9,51 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/aws/aws-sdk-go/service/iam"
 )
 
-type Client struct {
-	svc          *ecs.ECS
-	logger       *log.Logger
-	pollInterval time.Duration
+// ecsInterface for the ECS client.
+type ecsInterface interface {
+	RegisterTaskDefinition(*ecs.RegisterTaskDefinitionInput) (*ecs.RegisterTaskDefinitionOutput, error)
+	UpdateService(*ecs.UpdateServiceInput) (*ecs.UpdateServiceOutput, error)
+	DescribeServices(*ecs.DescribeServicesInput) (*ecs.DescribeServicesOutput, error)
+	DescribeTaskDefinition(*ecs.DescribeTaskDefinitionInput) (*ecs.DescribeTaskDefinitionOutput, error)
 }
 
-func New(region *string, logger *log.Logger) *Client {
-	sess := session.New(&aws.Config{Region: region})
-	svc := ecs.New(sess)
+// iamInterface interface for IAM client
+type iamInterface interface {
+	GetRole(*iam.GetRoleInput) (*iam.GetRoleOutput, error)
+}
+
+type Client struct {
+	ecsClient    ecsInterface
+	iamClient    iamInterface
+	logger       *log.Logger
+	pollInterval time.Duration
+	dryRun       bool
+	taskRoleArn  string
+}
+
+// New creates a new Client.
+func New(region *string, logger *log.Logger, dryRun bool, taskRoleArn string) *Client {
+	session, err := session.NewSession(&aws.Config{Region: region})
+	if err != nil {
+		logger.Fatalf("[error] failed to create session: %s\n", err)
+	}
+	ecsClient := ecs.New(session)
+	iamClient := iam.New(session)
 	return &Client{
-		svc:          svc,
+		ecsClient:    ecsClient,
+		iamClient:    iamClient,
 		pollInterval: time.Second * 5,
 		logger:       logger,
+		dryRun:       dryRun,
+		taskRoleArn:  taskRoleArn,
 	}
 }
 
-// RegisterTaskDefinition updates the existing task definition's image.
-func (c *Client) RegisterTaskDefinition(task, image, tag *string) (string, error) {
+// RegisterTaskDefinition updates the existing task definition's image, upgrading the task role if possible.
+func (c *Client) RegisterTaskDefinition(task, image, tag, service *string) (string, error) {
 	taskDef, err := c.GetTaskDefinition(task)
 	if err != nil {
 		return "", err
@@ -41,9 +66,17 @@ func (c *Client) RegisterTaskDefinition(task, image, tag *string) (string, error
 			d.Image = &i
 		}
 	}
+
+	// Get the manually set task role or upgrade the task role if possible.
+	// If any errors occur, use the existing task role.
+	taskRoleArn, err := c.getTaskRole(taskDef.TaskRoleArn, service)
+	if err != nil {
+		c.logger.Printf("[warn] Error getting task role, reusing what's in current task definition: %v", err)
+	}
+
 	input := &ecs.RegisterTaskDefinitionInput{
 		Family:                  task,
-		TaskRoleArn:             taskDef.TaskRoleArn,
+		TaskRoleArn:             taskRoleArn,
 		NetworkMode:             taskDef.NetworkMode,
 		ContainerDefinitions:    defs,
 		Volumes:                 taskDef.Volumes,
@@ -53,7 +86,13 @@ func (c *Client) RegisterTaskDefinition(task, image, tag *string) (string, error
 		Cpu:                     taskDef.Cpu,
 		Memory:                  taskDef.Memory,
 	}
-	resp, err := c.svc.RegisterTaskDefinition(input)
+
+	if c.dryRun {
+		c.logger.Printf("[dry-run] RegisterTaskDefinition input: %v\n", input)
+		return "dry-run-taskdef-arn", nil
+	}
+
+	resp, err := c.ecsClient.RegisterTaskDefinition(input)
 	if err != nil {
 		return "", err
 	}
@@ -72,7 +111,13 @@ func (c *Client) UpdateService(cluster, service *string, count *int64, arn *stri
 	if arn != nil {
 		input.TaskDefinition = arn
 	}
-	_, err := c.svc.UpdateService(input)
+
+	if c.dryRun {
+		c.logger.Printf("[dry-run] UpdateService input: %v\n", input)
+		return nil
+	}
+
+	_, err := c.ecsClient.UpdateService(input)
 	return err
 }
 
@@ -114,7 +159,7 @@ func (c *Client) GetDeployments(cluster, service *string) ([]*ecs.Deployment, er
 		Cluster:  cluster,
 		Services: []*string{service},
 	}
-	output, err := c.svc.DescribeServices(input)
+	output, err := c.ecsClient.DescribeServices(input)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +168,7 @@ func (c *Client) GetDeployments(cluster, service *string) ([]*ecs.Deployment, er
 
 // GetTaskDefinition gets the latest revision for the given task definition
 func (c *Client) GetTaskDefinition(task *string) (*ecs.TaskDefinition, error) {
-	output, err := c.svc.DescribeTaskDefinition(&ecs.DescribeTaskDefinitionInput{
+	output, err := c.ecsClient.DescribeTaskDefinition(&ecs.DescribeTaskDefinitionInput{
 		TaskDefinition: task,
 	})
 	if err != nil {
